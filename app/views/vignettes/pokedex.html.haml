@@ -20,54 +20,86 @@
 
 / DO NOT MODIFY ANYTHING BELOW THESE LINES
 / ----------------------------------
-:coffeescript
-  POKEDEX_URL= "https://pokeapi.co/api/v2/pokemon/"
-  
-  $ ->
-    grabPokedex(1) # default load
-    
-    # BIND FORM SUBMISSION BEHAVIOR TO POKEDEX CALL
-    $("form").submit (event)->
-      event.preventDefault()
-      data = $(this).serializeArray()
-      data =_.object(_.pluck(data, "name"), _.pluck(data, "value"))
-      grabPokedex(data.id)
-      return false
-  
-  capitalize = (str)->
-    str.charAt(0).toUpperCase()+str.slice(1)
-  
-  window.grabPokedex = (id)->
-    $.getJSON POKEDEX_URL+id, (resp)->
-      _.each $(".load"), (el)->
-        # GRAB PROPERTIES SPECIFIED IN HAML
-        query = $(el).data("query")
-        input = $(el).data("input")
-        if _.isUndefined(query) then return
-       
-        # RESOLVE QUERY TO JSON VALUE
-        query = query.split(".")
-        result = resp
-        corrupt = false
-        _.each query, (key)->
-          if result[key]
-            result = result[key]
-          else
-            corrupt = true
-        if corrupt
-          return
-        
-        # HOW TO HANDLE THE JSON VALUE
-        switch input
-          when "html"
-            $(el).html(result)
-          when "src"
-            $(el).attr("src", result)
-          else
-            $(el).html(result)
-            
-      console.log "API RESPONSE", resp
-        
+:javascript
+  POKEDEX_URL = "https://pokeapi.co/api/v2/pokemon/";
+  DEFAULT_POKEMON = 1
+  // MAIN FUNCTION
+  $(function() {
+    grabPokedex(DEFAULT_POKEMON); 
+
+    // LISTEN FOR CHANGES TO THE FORM
+    $("form").submit(function(event) {
+      event.preventDefault();
+      data = $(this).serializeArray();
+      data = _.object(_.pluck(data, "name"), _.pluck(data, "value"));
+      grabPokedex(data.id);
+      return false;
+    });
+  });
+
+  // Helper function - String Capitalization
+  capitalize = function(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  // Implements dot notation style indexing of JSON
+  // e.g. obj = {a: {b: [1]}}
+  // traditional indexing: obj["a"]["b"][0] ==> 1
+  // dot notation indexing: obj["a.b.0"] ==> 1
+  dotNotation = function(obj, query){
+    if (_.isUndefined(query)) { return "";}
+
+    query = query.split(".");
+
+    corrupt = false;
+
+    // Try to query 
+    _.each(query, function(key) {
+      console.log(obj, key)
+      if (obj[key]) {
+        obj = obj[key];
+      } else {
+        corrupt = true;
+      }
+    });
+    // Gracefully fail is malformed query
+    if (corrupt) {
+      return "";
+    } else{
+      return obj
+    }
+  }
+  // Injection routine
+  //  If the data-input property is specified in the DOM definition
+  //  then the following actions will take place.
+  injectionRoutine = function(el, input, result){
+    switch (input) {
+      case "html":
+        return $(el).html(result);
+      case "src":
+        return $(el).attr("src", result);
+      default:
+        return $(el).html(result);
+    }
+  }
+  grabPokedex = function(id) {
+    $.getJSON(POKEDEX_URL + id, function(resp) {
+
+      // For each element that has been flagged with a load class,
+      // Inject data as specified by the data-query and data-input attributes.
+      
+      _.each($(".load"), function(el) {
+        query = $(el).data("query");
+        input = $(el).data("input");
+        result = dotNotation(resp, query)
+        console.log("Loading", query, input, result)
+        injectionRoutine(el, input, result)
+      });
+
+      // DEBUG STATEMENT
+      console.log("API RESPONSE", resp);
+    });
+  }
 
 
 :scss
