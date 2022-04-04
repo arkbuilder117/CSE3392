@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     get "geocode"
     get "sightings"
     get "api_call"
+    get "sandbox"
   end
   
   namespace :api do

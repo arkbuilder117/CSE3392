@@ -15,4 +15,6 @@ class VignettesController < ApplicationController
     end
     def carmen
     end
+    def sandbox
+    end
 end
