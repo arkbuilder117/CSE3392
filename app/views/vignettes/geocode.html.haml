@@ -1,19 +1,71 @@
 :javascript
   log = []
-  GOOGLE_API_KEY = "REPLACE_WITH_API_KEY_IN_M4_BRIEF";
+  GOOGLE_API_KEY = "AIzaSyC8N5CZonTR0w7ezp2y6PSPkwcEJxbR7DI";
+  
+  //Added Functions
+  
+  function initGeolocation() {
+    if (navigator && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    } else {
+      console.log('Geolocation is not supported');
+    }
+  };
+  
+  function errorCallback() {
+    console.log("An error happened");
+  };
+  
+  function successCallback(position) {
+    var latitude = position.coords.latitude.toFixed(2);
+    var longitude = position.coords.longitude.toFixed(2);
+    console.log(latitude + ' ' + longitude);
+    injectionRoutine("latitude", latitude);
+    injectionRoutine("longitude", longitude);
+  }
+  
+  const timer = () => {
+    initGeolocation();
+  }
+  
+  const injectionRoutine = (name, value) => {
+    const stuff = $(`div[name = '${name}']`).html(value);
+    console.log(stuff);
+  }
+  
   // MAIN FUNCTION
   $(function(){
     console.log("#2 GEOCODE")
     
     // TODO: WATCH GPS LOCATION w/ 3000 ms TIMEOUT
     //     UPDATE LAT/LONG UI
+    
+    setInterval(timer, 3000);
       
     // TODO: PRINT BUTTON HANDLER -- PRINT OUT THE CONTENTS OF WINDOW.LOG
     //     INJECT ITEMS INTO THE  #output LIST
+    
+    $("#print").click(() => {
+      _.each(log, (el) => {
+        $("#output").append(`<p>${el}</p>`);
+      })
+      console.log(log);
+    })
       
     // TODO: LOG BUTTON HANDLER 
     // -- APPEND THE CURRENT GPS TO A GLOBAL LOG (window.log)
     // -- UPDATE THE LOG BADGE TO REFLECT THE LENGTH OF THE GLOBAL LOG
+    
+    $("#log").click(() => {
+      var longitude = $("div[name = 'latitude']").html();
+      var latitude = $("div[name = 'longitude']").html();
+      
+      if(!isNaN(longitude) || !isNaN(latitude)) {
+        log.push(`${longitude} ${latitude}`);
+      }
+      
+      $(".badge").html(log.length);
+    })
   })
     
    
@@ -26,7 +78,7 @@
       .app-container.ccsb.fh
         #coordinates.cc.fh
           .ui.statistic
-            .label [YOUR NAME]
+            .label Noah Walker
             .value{name: "longitude"} –
             .label Longitude
           .ui.statistic

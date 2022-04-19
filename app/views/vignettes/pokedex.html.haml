@@ -9,7 +9,44 @@
       / DO NOT MODIFY ANY LINE ABOVE THIS
       
       / YOUR SOLUTION HERE
-      .name.load{"data-query":"name", "data-input":"html"}
+      .ui.card
+        .image
+          %img.load{"data-query":"sprites.front_default", "data-input":"src"}
+        .content
+          %span.load{"data-query":"name", "data-input":"html"}
+          .right.floated
+            %span.load{"data-query":"weight", "data-input":"html"}
+            %span lb
+          .meta
+            %span.date.load{"data-query":"types.0.type.name", "data-input":"html"} 
+            %span.date.load{"data-query":"types.1.type.name", "data-input":"html"} 
+          .description
+            Kristy is an art director living in New York.
+        .content
+          .stats.ui.list 
+            STATS
+            %div
+              %span HP
+              %span.right.floated.load{"data-query":"stats.0.base_stat", "data-input":"html"}
+            %div
+              %span ATTACK
+              %span.right.floated.load{"data-query":"stats.1.base_stat", "data-input":"html"}
+            %div
+              %span DEFFENSE
+              %span.right.floated.load{"data-query":"stats.2.base_stat", "data-input":"html"}
+            %div
+              %span SPECIAL-ATTACK
+              %span.right.floated.load{"data-query":"stats.3.base_stat", "data-input":"html"}
+            %div
+              %span SPECIAL-DEFENCE
+              %span.right.floated.load{"data-query":"stats.4.base_stat", "data-input":"html"}
+            %div
+              %span SPEED
+              %span.right.floated.load{"data-query":"stats.5.base_stat", "data-input":"html"}
+        .extra.content
+          .meta
+            %span #
+            %span.load{"data-query":"id", "data-input":"html"}
       
 
 

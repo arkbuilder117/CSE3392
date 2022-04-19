@@ -1,8 +1,12 @@
 :javascript
-  // POKEMON_SIGHTINGS_API_PT = "/api/pokemon_sightings";
-  GOOGLE_API_KEY = "REPLACE_WITH_API_KEY_IN_M4_BRIEF";
+  POKEMON_SIGHTINGS_API_PT = "/api/pokemon_sightings";
+  GOOGLE_API_KEY = "AIzaSyC8N5CZonTR0w7ezp2y6PSPkwcEJxbR7DI";
   POKEDEX_URL = "https://pokeapi.co/api/v2/pokemon/";
   GEO_DISTANCE_URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
+  
+  //
+  POKEMON_SPRITES = [];
+  //
 
   $(function() {
     console.log("#2 POKEMON SIGHTINGS");
@@ -20,10 +24,97 @@
     console.log("GMaps loaded");
     return main();
   };
+  
+  const resolveTemplate = (parent, template, sprite, distance) => {
+    template = template.clone().removeClass("template");
+    //$("img").attr("src", sprite);
+    
+    template.find("img").attr("src", sprite);
+    template.find(".distance").html(distance);
+    
+    $(parent).append(template);
+  }
+  
+  //I need the ditances and the sprites in the same function or at least in the same object to call the template function
+  
+  function initGeolocation(el) {
+    // console.log(coord);
+    if (navigator && navigator.geolocation) {
+      // navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+      navigator.geolocation.getCurrentPosition((position) => {
+        successCallback(position, el);
+      }, errorCallback);
+    } else {
+      console.log('Geolocation is not supported');
+    }
+  };
+  
+  function errorCallback() {
+    console.log("An error happened");
+  };
+  
+  function successCallback(position, el) {
+    var latitude = position.coords.latitude;
+    var longitude = position.coords.longitude;
+    
+    let test = calculateDist(el, latitude, longitude);
+    //console.log(test);
+    
+  }
+  
+  const calculateDist = (el, latitude, longitude) => {
+    
+    //First clean up string
+    var newCoord = cleanString(el.coord);
+    console.log(newCoord)
+    latAndLong = newCoord.split(',');
+    
+    var origin = new google.maps.LatLng(latitude, longitude);
+    var destination = new google.maps.LatLng(latAndLong[0], latAndLong[1]);
+    
+    var service = new google.maps.DistanceMatrixService();
+    service.getDistanceMatrix({
+      origins: [origin],
+      destinations: [destination],
+      travelMode: google.maps.TravelMode.DRIVING,
+    }, (response, status) => {
+      
+      $.getJSON(POKEDEX_URL + el.pokemon, (resp) => {
+        let temp = response.rows[0].elements[0].distance.text.split(" ");
+        let miles = parseFloat(temp[0]) * 0.62;
+        let milesStr = Math.round(miles) + " " + "MILES";
+        resolveTemplate($("table"), $(".template"), resp.sprites.front_default, milesStr)
+      })
+      //console.log(response.rows[0].elements[0].distance.text)
+      return response.rows[0].elements[0].distance.text;
+      
+    })
+    
+    //return distance;
+    
+  }
+  
+  const cleanString = (string) => {
+    temp = string.substr(1);
+    temp_two = temp.split(',');
+    new_string = temp_two[0] + "," + temp_two[1];
+    return new_string;
+  }
+  
 
   // This function is called onced the Maps JS API has loaded.
   main = function() {
     // TODO - YOUR CODE HERE
+    
+    // var pokemon = [];
+    
+    $.getJSON(POKEMON_SIGHTINGS_API_PT, (resp) => {
+      
+      _.each(resp, (el) => {
+        initGeolocation(el);
+      })
+    })
+    
   };
 
     
